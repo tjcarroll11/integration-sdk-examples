@@ -1,28 +1,29 @@
 package com.mycorp.apikey.templates;
 
-import static com.mycorp.apikey.templates.APIKeyConnectedSystemTemplate.API_KEY;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.util.EntityUtils;
-
 import com.appian.connectedsystems.simplified.sdk.SimpleIntegrationTemplate;
 import com.appian.connectedsystems.simplified.sdk.configuration.SimpleConfiguration;
 import com.appian.connectedsystems.templateframework.sdk.ExecutionContext;
 import com.appian.connectedsystems.templateframework.sdk.IntegrationError;
 import com.appian.connectedsystems.templateframework.sdk.IntegrationResponse;
 import com.appian.connectedsystems.templateframework.sdk.TemplateId;
+import com.appian.connectedsystems.templateframework.sdk.configuration.Choice;
 import com.appian.connectedsystems.templateframework.sdk.configuration.PropertyPath;
 import com.appian.connectedsystems.templateframework.sdk.diagnostics.IntegrationDesignerDiagnostic;
 import com.appian.connectedsystems.templateframework.sdk.metadata.IntegrationTemplateRequestPolicy;
 import com.appian.connectedsystems.templateframework.sdk.metadata.IntegrationTemplateType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.mycorp.apikey.templates.APIKeyConnectedSystemTemplate.API_KEY;
 // Must provide an integration id. This value need only be unique for this connected system
 @TemplateId(name="LocationSearchIntegrationTemplate")
 // Set template type to READ since this integration does not have side effects
@@ -48,6 +49,11 @@ public class LocationSearchIntegrationTemplate extends SimpleIntegrationTemplate
         booleanProperty("phoneToggle")
           .label("Phone Number?")
           .instructionText("Is your query a phone number?")
+          .build(),
+        dropdownProperty("language", Arrays.asList(
+                Choice.builder().name("English").value("en").build(),
+                Choice.builder().name("Spanish").value("es").build()))
+          .label("Language")
           .build()
     );
   }
@@ -63,6 +69,7 @@ public class LocationSearchIntegrationTemplate extends SimpleIntegrationTemplate
     // The search term and phonetoggle are both specific to the integration
     String searchTerm = integrationConfiguration.getValue("searchField");
     Boolean phoneToggle = integrationConfiguration.getValue("phoneToggle");
+    String language = integrationConfiguration.getValue("language");
 
     IntegrationResponse.Builder integrationResponseBuilder;
     CloseableHttpResponse httpResponse = null;
@@ -71,7 +78,7 @@ public class LocationSearchIntegrationTemplate extends SimpleIntegrationTemplate
       // system will be displayed to the end user
       long startTime = System.currentTimeMillis();
       //Execute call to Google Places API
-      httpResponse = client.execute(apiKey, searchTerm, phoneToggle);
+      httpResponse = client.execute(apiKey, searchTerm, phoneToggle, language == null ? "en" : language);
       long endTime = System.currentTimeMillis();
       long executionTime = endTime - startTime;
 

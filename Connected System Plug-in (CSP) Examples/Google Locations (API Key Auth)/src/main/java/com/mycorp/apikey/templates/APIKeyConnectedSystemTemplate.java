@@ -40,7 +40,7 @@ public class APIKeyConnectedSystemTemplate extends SimpleTestableConnectedSystem
     String apiKey = simpleConfiguration.getValue(API_KEY);
     try (PlacesClient client = new PlacesClient()) {
       //Execute simple call to Google Places API
-      CloseableHttpResponse response = client.execute(apiKey, "", false);
+      CloseableHttpResponse response = client.execute(apiKey, "", false, "es");
 
       //Read entity directly to json string
       HttpEntity entity = response.getEntity();

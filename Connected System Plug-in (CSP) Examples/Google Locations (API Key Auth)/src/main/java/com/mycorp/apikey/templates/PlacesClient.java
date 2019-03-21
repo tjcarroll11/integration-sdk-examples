@@ -21,12 +21,12 @@ public class PlacesClient implements AutoCloseable {
     client = createDefault();
   }
 
-  public CloseableHttpResponse execute(String apiKey, String searchTerm, Boolean phoneToggle)
+  public CloseableHttpResponse execute(String apiKey, String searchTerm, Boolean phoneToggle, String language)
       throws IOException, URISyntaxException {
     HttpGet getRequest = new HttpGet();
     try {
       String inputType = getInputType(phoneToggle);
-      URI uri = constructRequest(apiKey, searchTerm, inputType);
+      URI uri = constructRequest(apiKey, searchTerm, inputType, language);
       getRequest.setURI(uri);
       return client.execute(getRequest);
     } finally {
@@ -42,9 +42,10 @@ public class PlacesClient implements AutoCloseable {
     }
   }
 
-  private URI constructRequest(String apiKey, String searchTerm, String inputType)
+  private URI constructRequest(String apiKey, String searchTerm, String inputType, String language)
       throws URISyntaxException {
     return new URIBuilder(BASE_URL)
+        .addParameter("language", language)
         .addParameter("input", searchTerm)
         .addParameter("inputtype", inputType)
         .addParameter("fields", "formatted_address,name,rating,opening_hours")
